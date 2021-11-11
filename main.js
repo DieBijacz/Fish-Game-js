@@ -71,15 +71,20 @@ const player = new Player();
 const bubbleArray = [];
 class Bubble {
     constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + Math.random() * canvas.height;
+        this.x = Math.random() * canvas.width;  /* x, y where bubbles are spawned */
+        this.y = canvas.height + 100;
         this.radius = 50;
         this.speed = Math.random() * 5 + 1;
-        this.distance;       
+        this.distance;   
+        this.counted = false;    
+        this.sound = Math.random() <= 0.5 ? 'sound1' : 'sound2';
     }
     update() {
         this.y -= this.speed;
-    }
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        this.distance = Math.sqrt(dx*dx + dy*dy) /* pitagoras. calculate distance between bubble and player */
+    }                                                   
     draw() {
         ctx.fillStyle = 'blue';
         ctx.beginPath();
@@ -89,16 +94,36 @@ class Bubble {
         ctx.stroke();
     }
 }
+
+const bubblePop1 = document.createElement('audio');
+bubblePop1.src = '../assets/bubbles-single1.wav';
+const bubblePop2 = document.createElement('audio');
+bubblePop2.src = '../assets/bubbles-single2.wav';
+
 function handleBubbles() {
     if(gameFrame % 50 == 0){
         bubbleArray.push(new Bubble());
-        console.log(bubbleArray.length);
     }
     for(let i = 0; i < bubbleArray.length; i++){
         bubbleArray[i].update();
-        bubbleArray[i].draw();
-        if (bubbleArray[i].y < 0){
+        bubbleArray[i].draw();        
+    }    
+    for(let i = 0; i < bubbleArray.length; i++){
+        if (bubbleArray[i].y < 0 - bubbleArray[i].radius*2){  /* removes bubbles when they reach top + size of bubble */
             bubbleArray.splice(i, 1);
+        }
+        /* ===== collision bubble and player ====== */
+        if (bubbleArray[i].distance < bubbleArray[i].radius + player.radius){
+            if (!bubbleArray[i].counted){
+                /*if (bubbleArray[i].sound == 'sound1'){
+                    bubblePop1.play();
+                } else {
+                    bubblePop2.play();
+                }*/
+                score++;
+                bubbleArray[i].counted = true;
+                bubbleArray.splice(i, 1);
+            }
         }
     }
 }
@@ -107,10 +132,12 @@ function handleBubbles() {
 // Animation Loop
 
 function animate(){
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    handleBubbles()
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    handleBubbles();
     player.update();
-    player.draw();
+    player.draw(); 
+    ctx.fillStyle = 'black'; 
+    ctx.fillText('score: ' + score, 10, 50)
     gameFrame++;    
     requestAnimationFrame(animate);
 
