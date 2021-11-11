@@ -29,7 +29,7 @@ canvas.addEventListener('mouseup', function(){
 // Player
 class Player {
     constructor(){
-        this.x = canvas.width;
+        this.x = canvas.width;      /* początkowa pozycja playera */
         this.y = canvas.height / 2;
         this.radius = 50;
         this.angle = 0;
@@ -43,10 +43,10 @@ class Player {
         const dx = this.x - mouse.x;
         const dy = this.y - mouse.y;
         if (mouse.x != this.x) {
-            this.x -= dx / 30;
+            this.x -= dx / 20;
         }
         if (mouse.y != this.y) {
-            this.y -= dy / 30;
+            this.y -= dy / 20;
         }
     }
     draw(){
@@ -67,16 +67,51 @@ class Player {
 }
 const player = new Player();
 
-
 // Bubbles
+const bubbleArray = [];
+class Bubble {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + Math.random() * canvas.height;
+        this.radius = 50;
+        this.speed = Math.random() * 5 + 1;
+        this.distance;       
+    }
+    update() {
+        this.y -= this.speed;
+    }
+    draw() {
+        ctx.fillStyle = 'blue';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+    }
+}
+function handleBubbles() {
+    if(gameFrame % 50 == 0){
+        bubbleArray.push(new Bubble());
+        console.log(bubbleArray.length);
+    }
+    for(let i = 0; i < bubbleArray.length; i++){
+        bubbleArray[i].update();
+        bubbleArray[i].draw();
+        if (bubbleArray[i].y < 0){
+            bubbleArray.splice(i, 1);
+        }
+    }
+}
 
 
 // Animation Loop
 
 function animate(){
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    handleBubbles()
     player.update();
     player.draw();
+    gameFrame++;    
     requestAnimationFrame(animate);
 
 }
