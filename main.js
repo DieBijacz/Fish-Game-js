@@ -27,6 +27,10 @@ canvas.addEventListener('mouseup', function(){
 })
 
 // Player
+const playerLeft = new Image();
+playerLeft.src = '../assets/graphics/spritesheets/__cartoon_fish_06_red_swim.png'
+const playerRight = new Image();
+playerRight.src ='../assets/graphics/spritesheets/red_swim_right.png'
 class Player {
     constructor(){
         this.x = canvas.width;      /* początkowa pozycja playera */
@@ -42,6 +46,8 @@ class Player {
     update() {            /* update player pos to mouse pos */
         const dx = this.x - mouse.x;
         const dy = this.y - mouse.y;
+        let theta = Math.atan2(dy, dx);
+        this.angle = theta;
         if (mouse.x != this.x) {
             this.x -= dx / 20;
         }
@@ -63,6 +69,16 @@ class Player {
         ctx.fill();
         ctx.closePath();
         ctx.fillRect(this.x, this.y, this.radius, 10);
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        if (this.x >= mouse.x){
+            ctx.drawImage(playerLeft, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, 0 - 60, 0 - 45, this.spriteWidth/4, this.spriteHeight/4);
+        } else {
+            ctx.drawImage(playerRight, this.frameX * this.spriteWidth, this.frameY * this.spriteHeight, this.spriteWidth, this.spriteHeight, 0 - 60, 0 - 45, this.spriteWidth/4, this.spriteHeight/4);
+        }
+        ctx.restore();
     }
 }
 const player = new Player();
@@ -112,22 +128,23 @@ function handleBubbles() {
         if (bubbleArray[i].y < 0 - bubbleArray[i].radius*2){  /* removes bubbles when they reach top + size of bubble */
             bubbleArray.splice(i, 1);
         }
-        /* ===== collision bubble and player ====== */
-        if (bubbleArray[i].distance < bubbleArray[i].radius + player.radius){
-            if (!bubbleArray[i].counted){
-                /*if (bubbleArray[i].sound == 'sound1'){
-                    bubblePop1.play();
-                } else {
-                    bubblePop2.play();
-                }*/
-                score++;
-                bubbleArray[i].counted = true;
-                bubbleArray.splice(i, 1);
-            }
+        if (bubbleArray[i]){
+            /* ===== collision bubble and player ====== */
+            if (bubbleArray[i].distance < bubbleArray[i].radius + player.radius){
+                if (!bubbleArray[i].counted){
+                    /*if (bubbleArray[i].sound == 'sound1'){
+                        bubblePop1.play();
+                    } else {
+                        bubblePop2.play();
+                    }*/
+                    score++;
+                    bubbleArray[i].counted = true;
+                    bubbleArray.splice(i, 1);
+                }
+            }            
         }
     }
 }
-
 
 // Animation Loop
 
